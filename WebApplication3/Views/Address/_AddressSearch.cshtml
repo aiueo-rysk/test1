@@ -1,0 +1,49 @@
+﻿
+<script src="https://api.zipaddress.net/sdk/zipaddr.min.js"></script>
+<script>
+
+    // 郵便番号の入力チェック
+    function checkPostalCode() {
+        var zip = $('#PostalCode').val();
+        if (!zip.match(/^[0-9]*$/)) {
+            alert('郵便番号には半角数値を入力してください。')
+            $('#PostalCode').val('');
+            return false;
+        }
+    }
+
+    // 郵便番号から住所を取得
+    function setState() {
+        var zip = $('#PostalCode').val();
+
+        // 未入力なら何もしない
+        if (zip === '') {
+            return false;
+        }
+
+        // 入力チェック
+        if (zip.length !== 7 || !zip.match(/^[0-9]*$/)) {
+            alert('郵便番号に半角数値7桁を入力してください。')
+            return false;
+        }
+
+        $.ajax({
+            type: 'get',
+            url: 'https://api.zipaddress.net/',
+            dataType: 'jsonp',
+            data: {
+                zipcode: zip,
+                lang: 'ja',
+            },
+            success: function (resp) {
+                if (resp.address != null) {
+                    $('#Prefectures').val(resp.pref); // 都道府県
+                    $('#Ctiy').val(resp.address);  // 市区町村
+                } else {
+                    alert('住所情報が取得できませんでした。');
+                    return false;
+                }
+            }
+        })
+    }
+</script>
