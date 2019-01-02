@@ -19,7 +19,6 @@ namespace AddressManagement
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            
         }
 
         public IConfiguration Configuration { get; }
@@ -36,12 +35,23 @@ namespace AddressManagement
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            // Facebookの認証を使用する
-            services.AddAuthentication().AddFacebook(facebookOptions =>
-            {
-                facebookOptions.AppId = "513360539150232";
-                facebookOptions.AppSecret = "521591fb73ae7c9d1400bc4d2e760be7";
-            });
+            // 外部サービス認証を使用する
+            services.AddAuthentication()
+                .AddMicrosoftAccount(microsoftOptions => {
+                    microsoftOptions.ClientId = Configuration["MicrosoftAPIOptions:ClientId"];
+                    microsoftOptions.ClientSecret = Configuration["MicrosoftAPIOptions:ClientSecret"];
+                })
+                .AddGoogle(googleOptions =>
+                {
+                    googleOptions.ClientId = Configuration["GoogleAPIOptions:ClientId"];
+                    googleOptions.ClientSecret = Configuration["GoogleAPIOptions:ClientSecret"];
+                })
+                //.AddTwitter(twitterOptions => { ... })
+                .AddFacebook(facebookOptions =>
+                {
+                    facebookOptions.AppId = Configuration["FacebookAPIOptions:AppId"];
+                    facebookOptions.AppSecret = Configuration["FacebookAPIOptions:AppSecret"];
+                });
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();

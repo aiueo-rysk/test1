@@ -87,63 +87,6 @@ namespace AddressManagement.Controllers
         }
 
         /// <summary>
-        /// Facebookログイン画面の初期表示
-        /// </summary>
-        /// <param name="returnUrl"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> LoginFb(string returnUrl = null)
-        {
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-            ViewData["ReturnUrl"] = returnUrl;
-            return View();
-        }
-
-        /// <summary>
-        /// Facebookログイン処理
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="returnUrl"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginFb(LoginFbViewModel model, string returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            if (ModelState.IsValid)
-            {
-                // Facebookログインのときのパスワードは固定値にしておく
-                var password = "ZAQ!2wsx";
-                var result = await _signInManager.PasswordSignInAsync(model.Email, password, isPersistent: true, lockoutOnFailure: false);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User logged in.");
-                    return RedirectToLocal(returnUrl);
-                }
-                else
-                {
-                    // アカウント情報をDBに登録する
-                    var user = new ApplicationUser { UserName = model.Email, Email = model.Email,  };
-                    var result2 = await _userManager.CreateAsync(user, password);
-                    if (result2.Succeeded)
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        _logger.LogInformation("User created a new account with password.");
-                        return RedirectToLocal(returnUrl);
-                    }
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View(model);
-                }
-            }
-
-            return View(model);
-        }
-
-
-        /// <summary>
         /// 登録画面の初期表示
         /// </summary>
         /// <param name="returnUrl"></param>
@@ -195,6 +138,112 @@ namespace AddressManagement.Controllers
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
             return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+        /// <summary>
+        /// 外部サービスによるログイン
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="returnUrl"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            // Request a redirect to the external login provider.
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+
+        /// <summary>
+        /// 外部サービスによるログイン判定
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <param name="remoteError"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            if (remoteError != null)
+            {
+                ErrorMessage = $"Error from external provider: {remoteError}";
+                return RedirectToAction(nameof(Login));
+            }
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Sign in the user with this external login provider if the user already has a login.
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
+                return RedirectToLocal(returnUrl);
+            }
+            if (result.IsLockedOut)
+            {
+                return RedirectToAction(nameof(Lockout));
+            }
+            else
+            {
+                // If the user does not have an account, then ask the user to create an account.
+                ViewData["ReturnUrl"] = returnUrl;
+                ViewData["LoginProvider"] = info.LoginProvider;
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
+            }
+        }
+
+        /// <summary>
+        /// ExternalLoginで登録ボタン押下時のイベント
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="provider"></param>
+        /// <param name="returnUrl"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string provider, string returnUrl = null)
+        {
+            if (ModelState.IsValid)
+            {
+                // Get the information about the user from the external login provider
+                var info = await _signInManager.GetExternalLoginInfoAsync();
+                if (info == null)
+                {
+                    throw new ApplicationException("Error loading external login information during confirmation.");
+                }
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var result = await _userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    result = await _userManager.AddLoginAsync(user, info);
+                    if (result.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        return RedirectToLocal(returnUrl);
+                    }
+                }
+                AddErrors(result);
+            }
+
+            ViewData["LoginProvider"] = provider;
+            ViewData["ReturnUrl"] = returnUrl;
+            return View(nameof(ExternalLogin), model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Lockout()
+        {
+            return View();
         }
 
         #region Helpers
