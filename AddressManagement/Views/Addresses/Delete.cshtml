@@ -1,0 +1,80 @@
+﻿@model AddressManagement.Models.Address
+
+@{
+    ViewData["Title"] = "住所削除";
+}
+
+<h2>住所削除</h2>
+
+<h3>削除してもよろしいでしょうか？</h3>
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.PostalCode)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.PostalCode)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Prefectures)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Prefectures)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Ctiy)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Ctiy)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Block)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Block)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Building)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Building)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Remarks)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Remarks)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.UserID)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.UserID)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.RegistrationTime)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.RegistrationTime)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.UpdateTime)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.UpdateTime)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="AddressID" />
+        <input type="submit" value="削除" class="btn btn-info" /> |
+        <a asp-action="Index">住所一覧へ戻る</a>
+    </form>
+</div>

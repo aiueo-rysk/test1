@@ -1,0 +1,165 @@
+﻿@model IEnumerable<AddressManagement.Models.Address>
+
+@{
+    ViewData["Title"] = "住所情報一覧";
+}
+
+<h2>住所情報一覧</h2>
+
+<form asp-action="Search" method="post">
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title accordion-toggle">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">検索条件 </a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="row form-group">
+                        <div class="col-md-2">
+                            @Html.DisplayNameFor(model => model.Title)
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" id="searchTitle" name="searchTitle" value="@ViewData["searchTitle"]" maxlength="50" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-2">
+                            @Html.DisplayNameFor(model => model.PostalCode)
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" id="searchPostalCode" name="searchPostalCode" value="@ViewData["searchPostalCode"]" maxlength="7" class="form-control" onchange="checkPostalCode()" />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="button" onclick="setState('searchPostalCode', 'searchPrefectures', 'searchCtiy')" value="郵便番号検索" class="btn btn-warning">
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-2">
+                            @Html.DisplayNameFor(model => model.Prefectures)
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" id="searchPrefectures" name="searchPrefectures" value="@ViewData["searchPrefectures"]" maxlength="10" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-2">
+                            @Html.DisplayNameFor(model => model.Ctiy)
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" id="searchCtiy" name="searchCtiy" value="@ViewData["searchCtiy"]" maxlength="200" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-2">
+                            @Html.DisplayNameFor(model => model.Block)
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" id="searchBlock" name="searchBlock" value="@ViewData["searchBlock"]" maxlength="200" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-2">
+                            @Html.DisplayNameFor(model => model.Building)
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" id="searchBuilding" name="searchBuilding" value="@ViewData["searchBuilding"]" maxlength="200" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-2">
+                            @Html.DisplayNameFor(model => model.Remarks)
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" id="searchRemarks" name="searchRemarks" value="@ViewData["searchRemarks"]" maxlength="200" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="検索" style="width:100px" class="btn btn-info">
+                        <input type="button" value="クリア" onclick="Clear()" style="width:100px" class="btn btn-default">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div>
+    検索結果件:@Model.Count()件　<a asp-action="Create">新しい住所情報を登録する</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width:15%">
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th style="width:8%">
+                @Html.DisplayNameFor(model => model.PostalCode)
+            </th>
+            <th style="width:10%">
+                @Html.DisplayNameFor(model => model.Prefectures)
+            </th>
+            <th style="width:14%">
+                @Html.DisplayNameFor(model => model.Ctiy)
+            </th>
+            <th style="width:14%">
+                @Html.DisplayNameFor(model => model.Block)
+            </th>
+            <th style="width:14%">
+                @Html.DisplayNameFor(model => model.Building)
+            </th>
+            <th style="width:14%">
+                @Html.DisplayNameFor(model => model.Remarks)
+            </th>
+            <th style="width:11%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PostalCode)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Prefectures)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Ctiy)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Block)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Building)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Remarks)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.AddressID">編集</a> |
+                    <a asp-action="Details" asp-route-id="@item.AddressID">参照</a> |
+                    <a asp-action="Delete" asp-route-id="@item.AddressID">削除</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@Html.Partial("_AddressSearch")
+<script>
+    // クリア
+    function Clear() {
+        $('#searchTitle').val('');
+        $('#searchPostalCode').val('');
+        $('#searchPrefectures').val('');
+        $('#searchCtiy').val('');
+        $('#searchBlock').val('');
+        $('#searchBuilding').val('');
+        $('#searchRemarks').val('');
+    }
+</script>

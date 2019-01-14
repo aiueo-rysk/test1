@@ -13,8 +13,21 @@
     }
 
     // 郵便番号から住所を取得
-    function setState() {
-        var zip = $('#PostalCode').val();
+    function setState(PostalCodeElmId, PrefecturesElmId, CtiyElmId) {
+
+        if (PostalCodeElmId == null) {
+            PostalCodeElmId = 'PostalCode'
+        }
+
+        if (PrefecturesElmId == null) {
+            PrefecturesElmId = 'Prefectures'
+        }
+
+        if (CtiyElmId == null) {
+            CtiyElmId = 'Ctiy'
+        }
+
+        var zip = $('#' + PostalCodeElmId).val();
 
         // 未入力なら何もしない
         if (zip === '') {
@@ -37,8 +50,8 @@
             },
             success: function (resp) {
                 if (resp.address != null) {
-                    $('#Prefectures').val(resp.pref); // 都道府県
-                    $('#Ctiy').val(resp.address);  // 市区町村
+                    $('#' + PrefecturesElmId).val(resp.pref); // 都道府県
+                    $('#' + CtiyElmId).val(resp.address);  // 市区町村
                 } else {
                     alert('住所情報が取得できませんでした。');
                     return false;

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using AddressManagement.Data.DbModel;
 using AddressManagement.Models;
 
 namespace AddressManagement.Data
@@ -24,7 +23,7 @@ namespace AddressManagement.Data
             // Add your customizations after calling base.OnModelCreating(builder);
         }
 
-        public DbSet<Address> Addresses { get; set; }
+        public DbSet<AddressManagement.Models.Address> Address { get; set; }
 
     }
 }

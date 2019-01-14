@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using AddressManagement.Data;
-using AddressManagement.Data.DbModel;
+using AddressManagement.Models;
 
 namespace AddressManagement.Models.AddressViewModels
 {
@@ -42,67 +42,67 @@ namespace AddressManagement.Models.AddressViewModels
         /// </summary>
         /// <param name="userID"></param>
         /// <param name="context"></param>
-        public int Search(string userID, ApplicationDbContext context)
-        {
-            // 自分が登録したデータだけを表示する
-            var query = context.Addresses.Where(x => x.UserID == userID);
+        //public int Search(string userID, ApplicationDbContext context)
+        //{
+        //    // 自分が登録したデータだけを表示する
+        //    var query = context.Addresses.Where(x => x.UserID == userID);
 
-            // 検索条件を反映
-            if (!String.IsNullOrWhiteSpace(Title))
-            {
-                query = query.Where(x => x.Title.Contains(Title));
-            }
-            if (!String.IsNullOrWhiteSpace(PostalCode))
-            {
-                query = query.Where(x => x.PostalCode.ToString().Contains(PostalCode));
-            }
-            if (!String.IsNullOrWhiteSpace(Prefectures))
-            {
-                query = query.Where(x => x.Prefectures.Contains(Prefectures));
-            }
-            if (!String.IsNullOrWhiteSpace(Ctiy))
-            {
-                query = query.Where(x => x.Ctiy.Contains(Ctiy));
-            }
-            if (!String.IsNullOrWhiteSpace(Block))
-            {
-                query = query.Where(x => x.Block.Contains(Block));
-            }
-            if (!String.IsNullOrWhiteSpace(Building))
-            {
-                query = query.Where(x => x.Building.Contains(Building));
-            }
-            if (!String.IsNullOrWhiteSpace(Remarks))
-            {
-                query = query.Where(x => x.Remarks.Contains(Remarks));
-            }
+        //    // 検索条件を反映
+        //    if (!String.IsNullOrWhiteSpace(Title))
+        //    {
+        //        query = query.Where(x => x.Title.Contains(Title));
+        //    }
+        //    if (!String.IsNullOrWhiteSpace(PostalCode))
+        //    {
+        //        query = query.Where(x => x.PostalCode.ToString().Contains(PostalCode));
+        //    }
+        //    if (!String.IsNullOrWhiteSpace(Prefectures))
+        //    {
+        //        query = query.Where(x => x.Prefectures.Contains(Prefectures));
+        //    }
+        //    if (!String.IsNullOrWhiteSpace(Ctiy))
+        //    {
+        //        query = query.Where(x => x.Ctiy.Contains(Ctiy));
+        //    }
+        //    if (!String.IsNullOrWhiteSpace(Block))
+        //    {
+        //        query = query.Where(x => x.Block.Contains(Block));
+        //    }
+        //    if (!String.IsNullOrWhiteSpace(Building))
+        //    {
+        //        query = query.Where(x => x.Building.Contains(Building));
+        //    }
+        //    if (!String.IsNullOrWhiteSpace(Remarks))
+        //    {
+        //        query = query.Where(x => x.Remarks.Contains(Remarks));
+        //    }
 
-            var items = query.ToList();
-            if(items.Count() > 0)
-            {
-                // 並び替え
-                items = items.OrderByDescending(x => x.UpdateTime).ToList();
+        //    var items = query.ToList();
+        //    if(items.Count() > 0)
+        //    {
+        //        // 並び替え
+        //        items = items.OrderByDescending(x => x.UpdateTime).ToList();
 
-                AddressList = new List<AddressViewModel>();    
-                foreach (var i in items)
-                {
-                    AddressList.Add(new AddressViewModel()
-                    {
-                        AddressID = i.AddressID.ToString(),
-                        Block = i.Block,
-                        Building = i.Building,
-                        Ctiy = i.Ctiy,
-                        PostalCode = i.PostalCode?.ToString(),
-                        Prefectures = i.Prefectures,
-                        Remarks = i.Remarks,
-                        Title = i.Title,
-                        UpdateTime = i.UpdateTime?.ToString("yyyy/MM/dd HH:mm:ss")
-                    });
-                }
-            }
+        //        AddressList = new List<AddressViewModel>();    
+        //        foreach (var i in items)
+        //        {
+        //            AddressList.Add(new AddressViewModel()
+        //            {
+        //                AddressID = i.AddressID.ToString(),
+        //                Block = i.Block,
+        //                Building = i.Building,
+        //                Ctiy = i.Ctiy,
+        //                PostalCode = i.PostalCode?.ToString(),
+        //                Prefectures = i.Prefectures,
+        //                Remarks = i.Remarks,
+        //                Title = i.Title,
+        //                UpdateTime = i.UpdateTime?.ToString("yyyy/MM/dd HH:mm:ss")
+        //            });
+        //        }
+        //    }
 
-            return items.Count;
-        }
+        //    return items.Count;
+        //}
 
 
         /// <summary>
@@ -111,12 +111,12 @@ namespace AddressManagement.Models.AddressViewModels
         /// <param name="addressID"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public int Delete(int addressID, ApplicationDbContext context)
-        {
-            Address item = context.Addresses.SingleOrDefault(x => x.AddressID == addressID);
-            context.Addresses.Remove(item);
-            return context.SaveChanges();
-        }
+        //public int Delete(int addressID, ApplicationDbContext context)
+        //{
+        //    Address item = context.Addresses.SingleOrDefault(x => x.AddressID == addressID);
+        //    context.Addresses.Remove(item);
+        //    return context.SaveChanges();
+        //}
         
 
     }
