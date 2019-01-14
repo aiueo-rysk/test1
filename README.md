@@ -9,7 +9,7 @@
 
 
 ## 環境構築手順
-1. `appsettings.json` の各種設定値を使用可能な値に書き換える
+1. 　visual studio上でプロジェクトを右クリック→「ユーザーシークレットの管理（G）」をクリックして`sercrets.json` に値を設定する
    - `ConnectionStrings:DefaultConnection`に接続可能なSQLServerの接続文字列を設定する  
    - `FacebookAPIOptions:AppId、FacebookAPIOptions:AppSecret`を設定する 
    [FacebookAPIの利用方法](https://docs.microsoft.com/ja-jp/aspnet/core/security/authentication/social/facebook-logins?view=aspnetcore-2.0)
