@@ -5,10 +5,6 @@
     <UserSecretsId>aspnet-WebApplication3-37383287-1FCC-4C80-818C-AB6A96EC4527</UserSecretsId>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Controllers\AddressController - コピー.cs" />
-    <Compile Remove="Controllers\HomeController - コピー.cs" />
-  </ItemGroup>
 
 
   <ItemGroup>
@@ -28,15 +24,6 @@
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
     <Content Update="Views\Addresses\_AddressSearch.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Views\Address\Address.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Views\Address\_AddressSearch.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
-    <Content Update="Views\Address\AddressList.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
   </ItemGroup>
