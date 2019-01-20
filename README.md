@@ -4,12 +4,12 @@
 
 1. `.NET Core Identity` によるログイン認証  
 2. `Facebook、Google、Microsoft` による外部サービス認証  
-3. 住所情報の登録・更新・削除  
+3. `EntityFramework` を利用した登録・更新・削除  
 4. `zipaddress.net` APIを利用した住所情報の取得  
-
+5. `XUnit` を利用した単体テスト [【参考URL】](https://docs.microsoft.com/ja-jp/aspnet/core/mvc/controllers/testing?view=aspnetcore-2.0)  
 
 ## 環境構築手順
-1. 　visual studio上でプロジェクトを右クリック→「ユーザーシークレットの管理（G）」をクリックして`sercrets.json` に値を設定する
+1. 　visual studio上でプロジェクトを右クリック→「ユーザーシークレットの管理（G）」をクリックして`sercrets.json` を開き、下記の値を設定する
    - `ConnectionStrings:DefaultConnection`に接続可能なSQLServerの接続文字列を設定する  
    - `FacebookAPIOptions:AppId、FacebookAPIOptions:AppSecret`を設定する 
    [FacebookAPIの利用方法](https://docs.microsoft.com/ja-jp/aspnet/core/security/authentication/social/facebook-logins?view=aspnetcore-2.0)
