@@ -125,51 +125,51 @@ namespace TestingControllersSample.Tests.UnitTests
         #endregion
 
         #region Registerメソッド(Post) 正常系　登録に成功してリダイレクト
-        [Fact]
-        public async Task Register_Post_Normal()
-        {
-            // Arrange
-            var registerViewModel = new RegisterViewModel();
-            string returnUrl = null;
-            var user = new ApplicationUser { UserName = registerViewModel.Email, Email = registerViewModel.Email };
-            var mockRepo = new Mock<IAccountRepository>();
-            mockRepo.Setup(repo => repo.CreateAsync(user, registerViewModel.Password))
-                    .ReturnsAsync(IdentityResult.Success);
-            var controller = new AccountController(mockRepo.Object);
+        //[Fact]
+        //public async Task Register_Post_Normal()
+        //{
+        //    // Arrange
+        //    var registerViewModel = new RegisterViewModel();
+        //    string returnUrl = null;
+        //    var user = new ApplicationUser { UserName = registerViewModel.Email, Email = registerViewModel.Email };
+        //    var mockRepo = new Mock<IAccountRepository>();
+        //    mockRepo.Setup(repo => repo.CreateAsync(user, registerViewModel.Password))
+        //            .ReturnsAsync(IdentityResult.Success);
+        //    var controller = new AccountController(mockRepo.Object);
 
-            // Act
-            var result = await controller.Register(registerViewModel, returnUrl);
+        //    // Act
+        //    var result = await controller.Register(registerViewModel, returnUrl);
 
-            // Assert
-            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Home", redirectToActionResult.ControllerName);
-            Assert.Equal("Index", redirectToActionResult.ActionName);
-        }
+        //    // Assert
+        //    var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+        //    Assert.Equal("Home", redirectToActionResult.ControllerName);
+        //    Assert.Equal("Index", redirectToActionResult.ActionName);
+        //}
         #endregion
 
 
         #region Registerメソッド(Post) 異常系①　登録に失敗する
-        [Fact]
-        public async Task Register_Post_Abnormal1()
-        {
-            // Arrange
-            var registerViewModel = new RegisterViewModel();
-            string returnUrl = null;
-            var user = new ApplicationUser { UserName = registerViewModel.Email, Email = registerViewModel.Email };
-            var mockRepo = new Mock<IAccountRepository>();
-            mockRepo.Setup(repo => repo.CreateAsync(user, registerViewModel.Password))
-                    .ReturnsAsync(IdentityResult.Failed(null));
-            var controller = new AccountController(mockRepo.Object);
+        //[Fact]
+        //public async Task Register_Post_Abnormal1()
+        //{
+        //    // Arrange
+        //    var registerViewModel = new RegisterViewModel();
+        //    string returnUrl = null;
+        //    var user = new ApplicationUser { UserName = registerViewModel.Email, Email = registerViewModel.Email };
+        //    var mockRepo = new Mock<IAccountRepository>();
+        //    mockRepo.Setup(repo => repo.CreateAsync(user, registerViewModel.Password))
+        //            .ReturnsAsync(IdentityResult.Failed(null));
+        //    var controller = new AccountController(mockRepo.Object);
 
-            // Act
-            var result = await controller.Register(registerViewModel, returnUrl);
+        //    // Act
+        //    var result = await controller.Register(registerViewModel, returnUrl);
 
-            // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.IsType<RegisterViewModel>(viewResult.ViewData.Model);
-            Assert.Null(viewResult.ViewName);
+        //    // Assert
+        //    var viewResult = Assert.IsType<ViewResult>(result);
+        //    Assert.IsType<RegisterViewModel>(viewResult.ViewData.Model);
+        //    Assert.Null(viewResult.ViewName);
 
-        }
+        //}
         #endregion
 
         #region Registerメソッド(Post) 異常系②　モデルエラー
@@ -357,37 +357,37 @@ namespace TestingControllersSample.Tests.UnitTests
         #endregion
 
         #region ExternalLoginConfirmationメソッド(Post) 正常系　ログインに成功し、リダイレクトする
-        [Fact]
-        public async Task ExternalLoginConfirmation_Post_Normal()
-        {
-            // Arrange
-            var externalLoginViewModel = new ExternalLoginViewModel() { Email = "testEmail" };
-            string provider = null;
-            string returnUrl = null;
-            var externalLoginInfo = GetSampleExternalLoginInfoObject();
-            var user = new ApplicationUser { UserName = externalLoginViewModel.Email, Email = externalLoginViewModel.Email };
-            var mockRepo = new Mock<IAccountRepository>();
-            mockRepo.Setup(repo => repo.GetExternalLoginInfoAsync())
-                    .ReturnsAsync(externalLoginInfo);
+        //[Fact]
+        //public async Task ExternalLoginConfirmation_Post_Normal()
+        //{
+        //    // Arrange
+        //    var externalLoginViewModel = new ExternalLoginViewModel() { Email = "testEmail" };
+        //    string provider = null;
+        //    string returnUrl = null;
+        //    var externalLoginInfo = GetSampleExternalLoginInfoObject();
+        //    var user = new ApplicationUser { UserName = externalLoginViewModel.Email, Email = externalLoginViewModel.Email };
+        //    var mockRepo = new Mock<IAccountRepository>();
+        //    mockRepo.Setup(repo => repo.GetExternalLoginInfoAsync())
+        //            .ReturnsAsync(externalLoginInfo);
 
-            mockRepo.Setup(repo => repo.CreateAsync(user))
-                    .ReturnsAsync(IdentityResult.Success);
+        //    mockRepo.Setup(repo => repo.CreateAsync(user))
+        //            .ReturnsAsync(IdentityResult.Success);
 
-            mockRepo.Setup(repo => repo.AddLoginAsync(user, externalLoginInfo))
-                    .ReturnsAsync(IdentityResult.Success);
+        //    mockRepo.Setup(repo => repo.AddLoginAsync(user, externalLoginInfo))
+        //            .ReturnsAsync(IdentityResult.Success);
 
-            mockRepo.Setup(repo => repo.SignInAsync(user))
-                    .Returns(Task.CompletedTask)
-                    .Verifiable();
+        //    mockRepo.Setup(repo => repo.SignInAsync(user))
+        //            .Returns(Task.CompletedTask)
+        //            .Verifiable();
 
-            var controller = new AccountController(mockRepo.Object);
+        //    var controller = new AccountController(mockRepo.Object);
 
-            // Act
-            var result = await controller.ExternalLoginConfirmation(externalLoginViewModel, provider, returnUrl);
+        //    // Act
+        //    var result = await controller.ExternalLoginConfirmation(externalLoginViewModel, provider, returnUrl);
 
-            // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-        }
+        //    // Assert
+        //    var viewResult = Assert.IsType<ViewResult>(result);
+        //}
         #endregion
 
         #region ExternalLoginConfirmationメソッド(Post) 異常系①　モデルエラー
