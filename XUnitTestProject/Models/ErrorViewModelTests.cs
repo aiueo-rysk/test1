@@ -11,7 +11,7 @@ namespace XUnitTestProject.Models
         [Fact]
         public void Create()
         {
-            var vm = new ErrorViewModel();
+            var errorViewModel = new ErrorViewModel();
         }
 
     }

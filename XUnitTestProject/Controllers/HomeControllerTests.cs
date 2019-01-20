@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using AddressManagement.Controllers;
 using Xunit;
+using AddressManagement.Models;
 
 namespace TestingControllersSample.Tests.UnitTests
 {
@@ -15,12 +16,18 @@ namespace TestingControllersSample.Tests.UnitTests
         [Fact]
         public IActionResult Index_ReturnsAViewResult()
         {
+            // Arrange
             var controller = new HomeController();
 
+            // Act
             var result = controller.Index();
 
-            return result;
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Null(viewResult.ViewData.Model);
+            Assert.Null(viewResult.ViewName);
 
+            return result;
         }
         #endregion
 
@@ -28,9 +35,16 @@ namespace TestingControllersSample.Tests.UnitTests
         [Fact]
         public IActionResult Error_ReturnsAViewResult_WithError()
         {
+            // Arrange
             var controller = new HomeController();
 
+            // Act
             var result = controller.Error();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.IsType<ErrorViewModel>(viewResult.Model);
+            Assert.Null(viewResult.ViewName);
 
             return result;
         }

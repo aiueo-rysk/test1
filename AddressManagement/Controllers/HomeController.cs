@@ -18,7 +18,12 @@ namespace AddressManagement.Controllers
 
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var vm = new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier
+            };
+
+            return View(vm);
         }
     }
 }

@@ -7,12 +7,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using AddressManagement.Models;
 using AddressManagement.Models.AccountViewModels;
-using AddressManagement.Services;
+using AddressManagement.Core.Interfaces;
 
 namespace AddressManagement.Controllers
 {
@@ -20,25 +17,22 @@ namespace AddressManagement.Controllers
     [Route("[controller]/[action]")]
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IEmailSender _emailSender;
-        private readonly ILogger _logger;
-
-        public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender,
-            ILogger<AccountController> logger)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _emailSender = emailSender;
-            _logger = logger;
-        }
+        /// <summary>
+        /// アカウント情報操作オブジェクト
+        /// </summary>
+        private readonly IAccountRepository _accountRepository;
 
         [TempData]
         public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="accountRepository"></param>
+        public AccountController(IAccountRepository accountRepository)
+        {
+            _accountRepository = accountRepository;
+        }
 
 
         /// <summary>
@@ -50,7 +44,10 @@ namespace AddressManagement.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(string returnUrl = null)
         {
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            if (HttpContext != null)
+            {
+                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            }
 
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -70,10 +67,9 @@ namespace AddressManagement.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                var result = await _accountRepository.PasswordSignInAsync(model);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
                     return RedirectToLocal(returnUrl);
                 }
                 else
@@ -114,11 +110,10 @@ namespace AddressManagement.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await _userManager.CreateAsync(user, model.Password);
+                var result = await _accountRepository.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User created a new account with password.");
+                    await _accountRepository.SignInAsync(user);
                     return RedirectToLocal(returnUrl);
                 }
                 AddErrors(result);
@@ -135,8 +130,7 @@ namespace AddressManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
-            _logger.LogInformation("User logged out.");
+            await _accountRepository.SignOutAsync();
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
@@ -151,9 +145,8 @@ namespace AddressManagement.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
-            // Request a redirect to the external login provider.
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            var redirectUrl = Url?.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+            var properties = _accountRepository.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
 
@@ -172,20 +165,18 @@ namespace AddressManagement.Controllers
                 ErrorMessage = $"Error from external provider: {remoteError}";
                 return RedirectToAction(nameof(Login));
             }
-            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var info = await _accountRepository.GetExternalLoginInfoAsync();
             if (info == null)
             {
                 return RedirectToAction(nameof(Login));
             }
 
-            // Sign in the user with this external login provider if the user already has a login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            var result = await _accountRepository.ExternalLoginSignInAsync(info);
             if (result.Succeeded)
             {
-                _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
                 return RedirectToLocal(returnUrl);
             }
-            if (result.IsLockedOut)
+            else if (result.IsLockedOut)
             {
                 return RedirectToAction(nameof(Lockout));
             }
@@ -213,21 +204,15 @@ namespace AddressManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Get the information about the user from the external login provider
-                var info = await _signInManager.GetExternalLoginInfoAsync();
-                if (info == null)
-                {
-                    throw new ApplicationException("Error loading external login information during confirmation.");
-                }
+                var info = await _accountRepository.GetExternalLoginInfoAsync();
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await _userManager.CreateAsync(user);
+                var result = await _accountRepository.CreateAsync(user);
                 if (result.Succeeded)
                 {
-                    result = await _userManager.AddLoginAsync(user, info);
+                    result = await _accountRepository.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        await _accountRepository.SignInAsync(user);
                         return RedirectToLocal(returnUrl);
                     }
                 }
@@ -258,7 +243,7 @@ namespace AddressManagement.Controllers
 
         private IActionResult RedirectToLocal(string returnUrl)
         {
-            if (Url.IsLocalUrl(returnUrl))
+            if (Url != null && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }

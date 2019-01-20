@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using AddressManagement.Models;
 using AddressManagement.Data;
 using Microsoft.AspNetCore.Authorization;
+using AddressManagement.Core.Interfaces;
 
 namespace AddressManagement.Controllers
 {
@@ -16,17 +17,17 @@ namespace AddressManagement.Controllers
     public class AddressesController : Controller
     {
         /// <summary>
-        /// DBコンテキスト
+        /// 住所情報操作オブジェクト
         /// </summary>
-        private readonly ApplicationDbContext _context;
+        private readonly IAddressesRepository _addressesRepository;
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="context"></param>
-        public AddressesController(ApplicationDbContext context)
+        public AddressesController(IAddressesRepository addressesRepository)
         {
-            _context = context;
+            _addressesRepository = addressesRepository;
         }
 
         /// <summary>
@@ -36,8 +37,8 @@ namespace AddressManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userID = User.Identity.Name;
-            return View(await _context.Address.Where(x => x.UserID.Equals(userID)).ToListAsync());
+            var userID = User?.Identity.Name;
+            return View(await _addressesRepository.GetAddressListAsync(userID));
         }
 
         /// <summary>
@@ -53,50 +54,46 @@ namespace AddressManagement.Controllers
                                                 string searchBuilding,
                                                 string searchRemarks)
         {
-            var userID = User.Identity.Name;
-            var query = _context.Address.Where(x => x.UserID.Equals(userID));
+            var userId = User?.Identity.Name;
 
             // 検索条件を反映
             if (!string.IsNullOrWhiteSpace(searchTitle))
             {
                 ViewData["searchTitle"] = searchTitle;
-                query = query.Where(x => x.Title.Contains(searchTitle));
             }
             if (!string.IsNullOrWhiteSpace(searchPostalCode))
             {
                 ViewData["searchPostalCode"] = searchPostalCode;
-                query = query.Where(x => x.PostalCode.ToString().Contains(searchPostalCode));
             }
             if (!string.IsNullOrWhiteSpace(searchPrefectures))
             {
                 ViewData["searchPrefectures"] = searchPrefectures;
-                query = query.Where(x => x.Prefectures.Contains(searchPrefectures));
             }
             if (!string.IsNullOrWhiteSpace(searchCtiy))
             {
                 ViewData["searchCtiy"] = searchCtiy;
-                query = query.Where(x => x.Ctiy.Contains(searchCtiy));
             }
             if (!string.IsNullOrWhiteSpace(searchBlock))
             {
                 ViewData["searchBlock"] = searchBlock;
-                query = query.Where(x => x.Block.Contains(searchBlock));
             }
             if (!string.IsNullOrWhiteSpace(searchBuilding))
             {
                 ViewData["searchBuilding"] = searchBuilding;
-                query = query.Where(x => x.Building.Contains(searchBuilding));
             }
             if (!string.IsNullOrWhiteSpace(searchRemarks))
             {
                 ViewData["searchRemarks"] = searchRemarks;
-                query = query.Where(x => x.Remarks.Contains(searchRemarks));
             }
 
-            // 並び替え
-            query = query.OrderByDescending(x => x.UpdateTime);
-
-            return View("Index", await query.ToListAsync());
+            return View("Index", await _addressesRepository.SearchAsync(userId,
+                                                                        searchTitle,
+                                                                        searchPostalCode,
+                                                                        searchPrefectures,
+                                                                        searchCtiy,
+                                                                        searchBlock,
+                                                                        searchBuilding,
+                                                                        searchRemarks));
         }
 
 
@@ -113,8 +110,7 @@ namespace AddressManagement.Controllers
                 return NotFound();
             }
 
-            var address = await _context.Address
-                .SingleOrDefaultAsync(m => m.AddressID == id);
+            var address = await _addressesRepository.GetByIdAsync(id.Value);
             if (address == null)
             {
                 return NotFound();
@@ -144,12 +140,11 @@ namespace AddressManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                address.UserID = User.Identity.Name;
+                address.UserID = User?.Identity.Name;
                 address.RegistrationTime = address.UpdateTime = DateTime.Now;
 
                 // 登録
-                _context.Add(address);
-                await _context.SaveChangesAsync();
+                await _addressesRepository.AddAsync(address);
                 return RedirectToAction(nameof(Index));
             }
             return View(address);
@@ -160,6 +155,7 @@ namespace AddressManagement.Controllers
         /// </summary>
         /// <param name="id">住所ID</param>
         /// <returns>住所情報更新画面</returns>
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -167,7 +163,7 @@ namespace AddressManagement.Controllers
                 return NotFound();
             }
 
-            var address = await _context.Address.SingleOrDefaultAsync(m => m.AddressID == id);
+            var address = await _addressesRepository.GetByIdAsync(id.Value);
             if (address == null)
             {
                 return NotFound();
@@ -187,25 +183,11 @@ namespace AddressManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
-                {
-                    address.UpdateTime = DateTime.Now;
+                address.UpdateTime = DateTime.Now;
 
-                    // 更新
-                    _context.Update(address);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AddressExists(address.AddressID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                // 更新
+                await _addressesRepository.UpdateAsync(address);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(address);
@@ -216,6 +198,7 @@ namespace AddressManagement.Controllers
         /// </summary>
         /// <param name="id">住所ID</param>
         /// <returns>削除確認画面</returns>
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -223,8 +206,7 @@ namespace AddressManagement.Controllers
                 return NotFound();
             }
 
-            var address = await _context.Address
-                .SingleOrDefaultAsync(m => m.AddressID == id);
+            var address = await _addressesRepository.GetByIdAsync(id.Value);
             if (address == null)
             {
                 return NotFound();
@@ -242,15 +224,10 @@ namespace AddressManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed([Bind("AddressID")] int addressID)
         {
-            var address = await _context.Address.SingleOrDefaultAsync(m => m.AddressID == addressID);
-            _context.Address.Remove(address);
-            await _context.SaveChangesAsync();
+            // 削除
+            await _addressesRepository.RemoveAsync(addressID);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool AddressExists(int id)
-        {
-            return _context.Address.Any(e => e.AddressID == id);
-        }
     }
 }

@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using AddressManagement.Data;
 using AddressManagement.Models;
 using AddressManagement.Services;
+using AddressManagement.Core.Interfaces;
+using Data;
 
 namespace AddressManagement
 {
@@ -66,10 +68,13 @@ namespace AddressManagement
                     facebookOptions.AppSecret = Configuration["FacebookAPIOptions:AppSecret"];
                 });
 
-            // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();
+
+            // 単体テストを実行しやすくするために、DIとロジックを切り離す
+            services.AddScoped<IAddressesRepository, EfAddressesRepository>();
+            services.AddScoped<IAccountRepository, EfAccountRepository>();
 
         }
 

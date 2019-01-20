@@ -5,6 +5,13 @@
     <UserSecretsId>aspnet-WebApplication3-37383287-1FCC-4C80-818C-AB6A96EC4527</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Models\AddressViewModels\**" />
+    <Content Remove="Models\AddressViewModels\**" />
+    <EmbeddedResource Remove="Models\AddressViewModels\**" />
+    <None Remove="Models\AddressViewModels\**" />
+  </ItemGroup>
+
 
 
   <ItemGroup>
@@ -29,7 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\DbModel\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 
